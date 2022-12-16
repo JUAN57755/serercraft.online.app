@@ -1,0 +1,10 @@
+{
+  "channel" : "beta",
+  "customChannels" : [],
+  "deviceId" : 5198349143342129423,
+  "formatVersion" : 0,
+  "locale" : "en-US",
+  "productLibraryDir" : "C:\\Users\\JuanDSierra\\AppData\\Local\\Mojang\\products",
+  "useArm64JreIfSupported" : false,
+  "version" : 2
+}

@@ -1,0 +1,18 @@
+{
+  "worlds": [
+    {
+      "name": "Demo_World",
+      "source": "C:\\Users\\JuanDSierra\\AppData\\Roaming\\.minecraft\\saves\\Demo_World",
+      "destination": "C:\\Users\\JuanDSierra\\AppData\\Roaming\\.minecraft\\backup\\saves\\saves\\Demo_World",
+      "lastChanged": "2022-10-27T14:11:35",
+      "backup": false
+    },
+    {
+      "name": "World1",
+      "source": "C:\\Users\\JuanDSierra\\AppData\\Roaming\\.minecraft\\saves\\World1",
+      "destination": "C:\\Users\\JuanDSierra\\AppData\\Roaming\\.minecraft\\backup\\saves\\saves\\World1",
+      "lastChanged": "2022-11-05T09:55:02",
+      "backup": false
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "clientToken": "fa680ece-ab76-45dc-995a-e09a8beee7e6",
+  "accounts": {
+    "b6836be781bc437d9f29aa1d3a7eba98": {
+      "username": "JD9726",
+      "userID": "b6836be781bc437d9f29aa1d3a7eba98",
+      "displayName": "JD9726",
+      "uuid": "b6836be781bc437d9f29aa1d3a7eba98",
+      "type": "free",
+      "premiumAccount": false
+    }
+  },
+  "selectedAccountUUID": "b6836be781bc437d9f29aa1d3a7eba98",
+  "freeAccountUUID": "ecb0cc4a94104c6b9a68556fe0ee33b1"
+}
