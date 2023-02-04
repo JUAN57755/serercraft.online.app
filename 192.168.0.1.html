@@ -1,0 +1,326 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="pragma" content="no-cache" />
+<!-- release 102414-->
+<!-- (c) Copyright 2011-2014, ARRIS Group, Inc., All rights reserved. -->
+<!--  <link rel="stylesheet" type="text/css" href="base.css"> -->
+<link rel="stylesheet" type="text/css" media="all" href="css/global.css"/>
+
+<!--[if IE 6]>
+<link rel="stylesheet" type="text/css" href="css/ie6styles.css"/>
+<![endif]-->
+<!--[if IE 7]>
+<link rel="stylesheet" type="text/css" href="css/ie7styles.css"/>
+<![endif]-->
+
+<link type="text/css" href="css/ui-lightness/jquery-ui-1.8.21.custom.css" rel="stylesheet"/>
+<!-- ARRIS MOD START FOR CLM34044 -->
+<script type="text/javascript" src="scripts/jquery-1.9.0.min.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="scripts/jquery-migrate-1.0.0.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="scripts/jquery-ui-1.9.2.custom.min.js?ver=9.1.103DV8W"></script>
+<!-- ARRIS MOD END -->
+
+
+<script type="text/javascript" src="scripts/json2.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="scripts/underscore.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="base.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="mib.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="base_95x.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="base_mso.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="archive.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="crypt.js?ver=9.1.103DV8W"></script>
+<script type="text/javascript" src="text.js?ver=9.1.103DV8W"></script>
+
+
+	<style>
+	.ui-progressbar-value { background-image: url(i/pbar-ani.gif); }
+	</style>
+
+
+<script type="text/javascript">
+
+    // ARRIS ADD BEGIN Handle Error messages. 
+    window.onerror = function(sMsg,sUrl,sLine){
+    	  $.logError("Error msg:"+sMsg + "   ["+sUrl+":"+sLine+"]");
+    	  
+    	  // Make sure all unauthorized exception will be handled.
+        if (sMsg.indexOf("unauthorized") != -1){
+        	 handleError("unauthorized");
+        }
+    }
+    // ARRIS ADD END
+    
+    var menuMap = { };
+
+    function menu() {
+        if (!isDBC()) {
+            _xlate["Wireless24GHz"] = _xlate["Wireless"];
+            _xlate["Wifi24GHz"] = _xlate["Wireless"];
+        }
+        //PEGATRON MOD START for PD42515
+        //While enforce to change password, only allow user login into change password.
+        if ((!isTechnician())&&(first_login_status()=="1"))
+        {
+            var m = [
+                { id: "BasicSetup", page: "basic_setup", children: [
+                    { id: "LoginSettings", page:"basic_password" } 
+                ] }
+            ];
+        }
+        else
+        {
+            var m = [
+                { id: "BasicSetup", page: "basic_setup", children: [
+                    { id: "BasicSetup", page:"basic_setup" },
+                    { id: "LoginSettings", page:"basic_password" } 
+                ] },
+                { id: "WANSetup", page: "wan_dynamic",
+                    children: [
+                        { id: "Dynamic", page: "wan_dynamic" },
+                        { id: "Static", page: "wan_static"},
+                        isIPV6() ?    { id: "DynamicV6", page: "wan_dynamicv6" } : null,
+                        isIPV6() && !is95x() ? { id: "StaticV6", page: "wan_staticv6"} : null,
+                        showDsLiteGUI() ?  { id: "DSLite", page: "wan_dslite"} : null,
+                        !isNET() ? { id: "L2TP", page: "wan_l2tp"} : null,    // PEGATRON ADD for 21122
+                        isTechnician() ? { id: "Routing", page: "wan_routing"} : null
+                        //isIPV6() && isTechnician() ? { id: "RoutingV6", page: "wan_routingv6"} : null
+                        //{ id: "DNS", page: "wan_dns" }
+                    ] },
+                { id: "LANSetup", page: "lan_settings",
+                    children: [
+                        { id: "LANSettings", page:"lan_settings"},
+                        isIPV6() ? { id: "LANSettingsV6", page:"lan_settingsv6"} : null,
+                        { id: "ClientList", page:"lan_dhcp"},
+                        { id: "Ports", page:"lan_ports"},
+                   //     !isTwc() ? { id: "DynamicRouting", page:"lan_dynamic"} : null,
+                        //    { id: "RoutingTable", page:"lan_static"}
+                        //{ id: "LANNetworks", page:"lan_networks" }
+                        !isNET() ? { id: "StaticRouting", page:"lan_staticrouting" } : null
+                    ] },
+                { id: "Wireless24GHz", page: "wifi_basic",
+                    children: [
+                        { id: "Basic", page:"wifi_basic" },
+                        { id: "Advanced", page:"wifi_advanced" },
+                        //   { id: "WDS", page:"wifi_wds" },
+                        //   { id: "WPS", page:"wifi_wps" },
+                        {id:"MACAddressControl", page:"wifi_mac" },
+                        { id:"WirelessClientList", page:"wifi_wcl"},
+		        showSSIDGraph() ?   { id:"SSIDS", page:"wifi_ssids"} : null,
+    		    showATM() ? { id:"AirtimeManagement", page:"wifi_atm"}:null,
+                        /* Task 55026 - IZZI ADD */
+                         (!isPuma5Wifi() &&  isSettingsSameAsNA() ) ? { id:"GuestSSID", page:"wifi_guest" } : null,  // PEGATRON ADD - PD17238
+                        (!isNET() && isMTKDBC() && !isAhncEnable()) ? { id:"BandSteeringExclusion", page:"wifi_bandsteeringexclusion" } : null // PEGATRON ADD for CLM43466, 66766
+                    ] },
+            
+                isDBC() ? // UNIHAN MOD
+                { id: "Wireless5GHz", page: "wifi_basic1",
+                    children: [
+                        { id: "Basic", page:"wifi_basic1" },
+                        { id: "Advanced", page:"wifi_advanced1" },
+                        //   { id: "WDS", page:"wifi_wds" },
+                        //   { id: "WPS", page:"wifi_wps" },
+                        {id:"MACAddressControl", page:"wifi_mac1" },
+                        { id:"WirelessClientList", page:"wifi_wcl1"},
+		        showSSIDGraph() ?   { id:"SSIDS", page:"wifi_ssids1"} : null,
+    		    showATM() ? { id:"AirtimeManagement", page:"wifi_atm1"}:null,
+                        /* Task 55026 - IZZI ADD */
+                        ( !isPuma5Wifi() &&  isSettingsSameAsNA()  ) ? { id:"GuestSSID50", page:"wifi_guest1" } : null,  // PEGATRON ADD - PD17238
+                        (!isNET() && isMTKDBC() && !isAhncEnable()) ? { id:"BandSteeringExclusion", page:"wifi_bandsteeringexclusion1" } : null // PEGATRON ADD for CLM43466, 66766
+                    ] } : null ,// UNIHAN MOD
+
+                { id: "Firewall", page: "firewall_settings",
+                    children: [
+                        { id:"FirewallSettings", page:"firewall_settings"},
+                        {id: "VirtualServers", page:"firewall_virt"  },
+                        {id: "PortTriggers", page:"firewall_port"  },
+                        { id: "ClientIPFilters", page:"firewall_ip"  },
+                        isIPV6() ? { id: "ClientIPV6Filters", page:"firewall_ipv6"  } : null,
+                        {id:"DMZ", page:"firewall_dmz" },
+                        //                { id:"MACAddressFiltering", page:"firewall_mac" },
+                        //             {id:"DDNS", page:"firewall_ddns" },
+                        { id:"URLFiltering", page:"firewall_url" },
+                        { id:"ALG", page:"firewall_alg" },
+                        showMacBridgeGUI() ? { id:"MACBridging", page:"firewall_macbridge" } : null
+                    ] },
+
+
+                hasMoca() ? { id: "MOCA", page: "moca_main",
+                    children: [
+                        { id:"MocaStatus", page:"moca_main"},
+                        !isNET() ? { id:"MocaNodeList", page:"moca_nodes"} : null // PEGATRON ADD PD4668
+//                        {id: "MocaAdvanced", page:"moca_advanced"  }
+                    ] } : null,
+                // UNIHAN ADD START PD6907
+                !isNET() ? { id: "USB", page:"usb_status",
+                    children: [
+                    { id: "UsbStatus", page:"usb_status"},
+                    { id: "FileSharing", page:"usb_file" },
+                    { id: "MediaSharing", page:"usb_media" },
+                    { id: "UsbAccessControl", page:"usb_access"}
+                    ] } : null, 
+                // UNIHAN ADD END
+                { id: "Utilities", page: "util_status",
+                    children: [
+                        { id: "Status", page: "util_status" },
+                        { id: "RestartRouter", page: "util_restart" },
+                        { id: "RebootDevice", page: "util_reboot" }, //ARRIS MOD - PD54335
+                        { id: "FactoryDefaults", page: "util_defaults" },
+                        { id: "SaveBackupSettings", page: "util_save" },
+                        { id: "RestoreSettings", page: "util_restore" },
+                        { id: "SystemsSettings", page: "util_systems" },
+                        !isMG() ? { id: "Language", page: "util_lang" } : null,
+                        // UNIHAN PROD00195563//!isMG() ? { id: "SysLogConfig", page: "util_logconf" } : null,
+                        { id: "SystemLogs", page: "util_log"},
+                            {id:"DDNS", page:"util_ddns" },
+                        isTechnician() ? {id:"Spectrum", page:"util_spectrum"} : null, /* PD221464 enable for all tech access. */
+                        //,
+                        //{ id: "SpeedTest", page: "util_speedtest"}
+                        { id: "Ping", page: "util_ping" },
+                        { id: "TraceRoute", page: "util_trace" },
+                        { id: "RemoteManagement", page: "util_remotemanage"}
+                    ]
+                }, 
+                (!isNET() && isAhncEnable() && (isTopologyEnabled() || isTechnician())) ? { id: "AHNC", page: "ahnc_setting",
+                    children: [
+                        isTopologyEnabled() ? { id: "Network Topology", page:"ahnc_setting", children:[]} : null,
+					    isTechnician() ? {id:"SteeringHistory", page:"steering_history"} : null
+                    ]
+                } : null
+            ];
+        }
+        //PEGATRON MOD END for PD42515
+        m = _.select(m, function(m) { return m && menuVisible(m.id); });
+        //m = _.without(m, null);
+        menuMap["login"] =  { id: "Login", page: "login"};
+        _.each(m, function(menu) {
+//            for (var i=0; i<menu.length;i++)
+//                if (hide(menu[i].page
+            menu.children = _.select(menu.children, function(m) { return  m && submenuVisible(m.page); });
+            _.each(menu.children, function f(m) { menuMap[m.page] = m; });
+           // menu.children = _.without(menu.children, null);
+        });
+        return m;
+    }
+
+//    var pageBand = 1;
+    function complete() {
+    	try{
+        base = getURLArgs() || getDefaultPage();
+        var preloaded = typeof loadData != "undefined";
+        if (!isLoggedIn() || preloaded) {
+            if (preloaded)
+                loadData();
+            render();
+            return;
+        }
+
+        var modbase = base;
+        if (modbase.endsWith("1")) {
+            is5GPageURL = true;
+            modbase = modbase.substr(0,modbase.length-1);
+        }
+        $.cachedScript(modbase + "_data.js?ver=9.1.103DV8W", function success() {
+            $.cachedScript(modbase + ".js?ver=9.1.103DV8W", function success() {
+            	try{
+                loadData();
+                $.log("ACCESSED:");
+                listAccessed();
+                render();
+              }catch(e){
+              	handleError(e);	// ARRIS MOD. PROD00198245
+              }
+            });
+        });
+      }catch(e){
+      	handleError(e);	// ARRIS MOD. PROD00198245
+      }
+    }
+
+	function doCompletion(){
+        continueSession();
+        complete();
+	}
+	
+    $(function () {
+    	var langCode = getLangCode();
+    	if (langCode){
+    		$.cachedScript("text_"+langCode+".js?ver=9.1.103DV8W", null, {async:false});
+    	}
+    	var timerCount = 0;
+    	function getElapsedTimeStr(cnt){
+    		var s = "";
+    		for (var i=0; i<=cnt%3; i++){ s+=".";}
+    		return s;
+    	}
+		function showDialog(id){
+			$("#loading-dialog").css("display","block");
+			if (id=="initial"){
+	        	$("#loading-text").text(xlate("Your unit is updating, please wait for a moment."));
+			}else{
+	        	$("#loading-text").text(xlate("This page is loading, please wait for a moment."));
+			}
+		}
+		var tryCounts = 0; var maxTryCount = 10;
+		function checkInitialStatus(){
+			if ((tryCounts++)>=maxTryCount){//Try less than 10 times
+				$.logError("Tried out of "+tryCounts+" times, do next.");
+				doCompletion();
+				return;
+			}
+	    	var oid = MibObjects.ApplyAllSettings.oid+".0";
+	    	var url = hooks.buildGetURL([oid]);
+			$.ajax({
+				url: url,
+				timeout:30000,
+				cache:false,// UNIHAN ADD, PD216568
+				success: function (result) {
+	                result = decrypt(result);
+	                $.log("get result " + result);
+	                try {
+	                    var rrv = JSON.parse(result);
+	                    if (rrv && rrv[oid] && rrv[oid].asInt()==1){
+					    	
+			        		showDialog("loading");
+			        		doCompletion();
+			        		return;
+				        }
+		            } catch (e) {
+		            	$.logError("JSON.parse:"+result+" error="+e);
+		            }
+		            
+		            showDialog("initial");
+		            jQuery.event.trigger( "ajaxStop" );
+				    $.log("ApplyAllSettings returns "+result+", continue to check the status..");
+		            setTimeout(checkInitialStatus, 5000);
+	            },
+	            error:function (jqXHR, textStatus, errorThrown) {
+	            	$.logError("textStatus="+textStatus+" errorThrown="+errorThrown);
+	                showDialog("initial");
+	                jQuery.event.trigger( "ajaxStop" );
+	                setTimeout(checkInitialStatus, 5000);
+	            },
+	            async:true,
+	            dataType:"text"}
+	        );
+		}
+		checkInitialStatus();
+		
+    });
+
+</script>
+
+
+<title></title>
+
+
+</head>
+
+<body>
+<div id="loading-dialog" style="display:none;padding-top:200px;" ><div><img src="i/loading-100.gif"  /></div><div id="loading-text"  style="color:#FF9000;padding-top:18px;font-family:Arial,'Helvetica Neue',Helvetica,sans-serif;">This page is loading, please wait for a moment.</div></div>
+
+
+</body>
+</html>
